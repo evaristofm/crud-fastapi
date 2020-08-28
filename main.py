@@ -1,8 +1,8 @@
 from fastapi import FastAPI, HTTPException, Depends
-from schemas import Pet, PetCreate
+from schemas import Pet, PetCreate, PetUpdate, PetBase
 from typing import List
 
-import models, schemas, crud
+import models, crud
 from sqlalchemy.orm import Session
 from database import engine, SessionLocal
 
@@ -37,7 +37,22 @@ async def get_pet(id: int, db: Session = Depends(get_db)):
 
     raise HTTPException(status_code=404, detail="Pet not found")
 
-@app.post('/pets', response_model=Pet)
+@app.post('/pets', response_model=Pet, status_code=201)
 async def create_pet(pet: PetCreate, db: Session = Depends(get_db)):
     return crud.create_pet(db, pet)
- 
+
+@app.delete('/pets/{id}')
+async def delete_pet(id: int, db: Session = Depends(get_db), status_code=204):
+    pet_db = crud.get_pet(db, id)
+    if pet_db:
+        crud.delete_pet(db, id)
+        return {"message": "Pet deleted"}
+    raise HTTPException(status_code=404, detail="Pet not found")
+
+
+@app.patch("/pets/{id}", response_model=Pet)
+async def update_pet(id: int, pet: PetUpdate, db: Session = Depends(get_db)):
+    pet_db = crud.get_pet(db, id)
+    if pet_db:
+        return crud.update_pet(db, id, pet)
+    raise HTTPException(status_code=404, detail="Pet not found")

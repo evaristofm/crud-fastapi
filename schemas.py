@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
 class PetBase(BaseModel):
@@ -9,6 +10,13 @@ class PetBase(BaseModel):
 
 class PetCreate(PetBase):
     ...
+
+
+class PetUpdate(PetBase):
+    name: Optional[str]
+    kind: Optional[str]
+    color: Optional[str]
+
 
 class Pet(PetBase):
     id: int
